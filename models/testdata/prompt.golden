@@ -1,0 +1,28 @@
+## SAIA Academic Cloud — Available Models
+
+| Model ID | Name | Context | Reasoning |
+|----------|------|---------|----------|
+| saia/glm-4.7 | GLM 4.7 | 128K | ✅ |
+| saia/qwen3.5-397b-a17b | Qwen 3.5 397B | 128K | ✅ |
+| saia/qwen3.5-122b-a10b | Qwen 3.5 122B | 128K | ✅ |
+| saia/devstral-2-123b-instruct-2512 | DevStral 2 123B | 128K | ✅ |
+| saia/openai-gpt-oss-120b | GPT-OSS 120B | 128K | ✅ |
+| saia/qwen3.6-27b | Qwen 3.6 27B | 128K | ✅ |
+
+### Usage
+
+Switch to a SAIA model:
+  /model saia/glm-4.7
+
+Large reasoning model:
+  /model saia/qwen3.5-397b-a17b
+
+Lightweight model for quick tasks:
+  /model saia/qwen3.6-27b
+
+### API Key
+
+Set via environment variable:
+  export SAIA_API_KEY="your-key"
+
+Or add to auth.json (saia key), or use /login.
