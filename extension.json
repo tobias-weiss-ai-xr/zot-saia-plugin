@@ -1,0 +1,8 @@
+{
+  "name": "zot-saia-plugin",
+  "version": "1.0.0",
+  "exec": "python3 src/saia_extension.py",
+  "language": "python",
+  "description": "SAIA Academic Cloud provider — registers /saia-models slash command",
+  "enabled": true
+}

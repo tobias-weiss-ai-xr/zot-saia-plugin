@@ -1,0 +1,54 @@
+{
+  "additional_providers": {
+    "saia": {
+      "name": "SAIA Academic Cloud",
+      "api": "openai-completions",
+      "base_url": "https://chat-ai.academiccloud.de/v1",
+      "api_key_env": "SAIA_API_KEY",
+      "models": [
+        {
+          "id": "glm-4.7",
+          "name": "GLM 4.7 (SAIA)",
+          "context_window": 131072,
+          "max_output": 32768,
+          "reasoning": true
+        },
+        {
+          "id": "qwen3.5-397b-a17b",
+          "name": "Qwen 3.5 397B (SAIA)",
+          "context_window": 131072,
+          "max_output": 32768,
+          "reasoning": true
+        },
+        {
+          "id": "qwen3.5-122b-a10b",
+          "name": "Qwen 3.5 122B (SAIA)",
+          "context_window": 131072,
+          "max_output": 32768,
+          "reasoning": true
+        },
+        {
+          "id": "devstral-2-123b-instruct-2512",
+          "name": "DevStral 2 123B (SAIA)",
+          "context_window": 131072,
+          "max_output": 32768,
+          "reasoning": true
+        },
+        {
+          "id": "openai-gpt-oss-120b",
+          "name": "GPT-OSS 120B (SAIA)",
+          "context_window": 131072,
+          "max_output": 32768,
+          "reasoning": true
+        },
+        {
+          "id": "qwen3.6-27b",
+          "name": "Qwen 3.6 27B (SAIA)",
+          "context_window": 131072,
+          "max_output": 32768,
+          "reasoning": true
+        }
+      ]
+    }
+  }
+}
