@@ -3,44 +3,47 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A zot extension + models configuration that auto-registers all **SAIA Academic Cloud** models as a custom provider — no manual `--base-url` flags needed.
+A self-contained Go extension for zot that auto-registers all **SAIA Academic Cloud** models as a custom provider — no manual `--base-url` flags needed.
 
-Ported from [pi-saia-plugin](https://github.com/tobias-weiss-ai-xr/pi-saia-plugin) following the same pattern.
+Ported from [pi-saia-plugin](https://github.com/tobias-weiss-ai-xr/pi-saia-plugin).
 
 ## Features
 
-- **Auto-registration** — Drop `models.json` into `$ZOT_HOME/` or your project to add all 6 SAIA models
+- **Self-contained Go binary** — single static executable, no runtime dependencies
+- **Auto-registration** — `models.json` adds all 6 SAIA models on startup
 - **Slash command** — `/saia-models` lists available models and usage
 - **Skill included** — `SKILL.md` documents models, API key setup, and examples
 - **OpenAI-compatible** — Uses standard OpenAI completions API
 
-## Installation
+## Quick Start
 
-### Option A: Install extension (recommended)
+### Build
 
 ```bash
-zot ext install /path/to/zot-saia-plugin
+git clone https://github.com/tobias-weiss-ai-xr/zot-saia-plugin.git
+cd zot-saia-plugin
+./build.sh
 ```
 
-### Option B: Manual setup
+Or manually:
 
 ```bash
-# Copy models.json to your zot home
-cp models.json ~/.local/state/zot/models.json
-
-# Copy skill to your skills directory
-cp skills/saia-models.md ~/.local/state/zot/skills/
+CGO_ENABLED=0 go build -o zot-saia-plugin ./cmd/zot-saia-plugin
 ```
 
-Then restart zot:
+### Install into zot
 
 ```bash
-zot
+zot ext install .
+```
+
+Then restart zot and use:
+
+```
+/saia-models
 ```
 
 ### API Key
-
-Set your API key via environment variable or `auth.json`:
 
 ```bash
 export SAIA_API_KEY="your-key"
@@ -81,30 +84,26 @@ zot --provider saia --model glm-4.7
 
 ```
 zot-saia-plugin/
-├── README.md               # This file
-├── LICENSE                 # MIT
-├── extension.json          # Zot extension manifest
-├── models.json             # Custom provider + model definitions
-├── src/
-│   └── saia_extension.py   # Extension subprocess (slash commands)
-└── skills/
-    └── saia-models.md      # Model documentation skill
+├── cmd/zot-saia-plugin/
+│   └── main.go              # Extension binary (uses zot Go SDK)
+├── skills/
+│   └── saia-models.md      # Model documentation skill
+├── models.json              # Custom provider + model definitions
+├── extension.json           # Zot extension manifest
+├── go.mod                   # Go module
+├── build.sh                 # Build script (static binary)
+├── LICENSE
+└── README.md
 ```
 
 ## Architecture
 
-This plugin maps the pi package pattern to zot's extension model:
-
 | pi concept | zot equivalent |
 |---|---|
 | `pi.registerProvider()` in TypeScript | `models.json` in `$ZOT_HOME/` |
-| Extension (in-process TS) | Extension (subprocess + JSON-RPC, any language) |
+| Extension (in-process TS) | Go binary via `ext` SDK (subprocess + JSON-RPC) |
 | `SKILL.md` | `SKILL.md` (Agent Skills standard) |
 | `pi install` | `zot ext install` |
-
-- **models.json**: Defines the `saia` provider with its OpenAI-compatible base URL and all 6 models. Placed in `$ZOT_HOME/` so zot discovers it on startup.
-- **Extension** (`src/saia_extension.py`): A lightweight Python subprocess that registers the `/saia-models` slash command for quick model reference.
-- **Skill** (`skills/saia-models.md`): Provides user-facing documentation of available models, usage examples, and API key setup.
 
 ## License
 
