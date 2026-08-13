@@ -1,6 +1,8 @@
 # zot-saia-plugin
 > SAIA (Academic Cloud Hessen) provider for [zot](https://zot.sh)
 
+> ⚠️ **Note:** Active development takes place on [GitHub](https://github.com/tobias-weiss-ai-xr/zot-saia-plugin). Any other hosted copies are **legacy mirrors** — synced periodically but not actively maintained there.
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A self-contained Go extension for zot that auto-registers all **SAIA Academic Cloud** models as a custom provider — no manual `--base-url` flags needed.
