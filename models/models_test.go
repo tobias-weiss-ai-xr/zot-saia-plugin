@@ -26,7 +26,7 @@ var (
 // ---------------------------------------------------------------------------
 
 func TestAllModelsCount(t *testing.T) {
-	if got, want := len(models.All), 6; got != want {
+	if got, want := len(models.All), 16; got != want {
 		t.Fatalf("expected %d models, got %d", want, got)
 	}
 }
@@ -53,17 +53,29 @@ func TestModelNamesAreUnique(t *testing.T) {
 
 func TestModelProperties(t *testing.T) {
 	tests := []struct {
-		name     string
-		id       string
-		wantCtx  string
-		wantName string
+		name       string
+		id         string
+		wantCtx    string
+		wantMaxOut string
+		wantName   string
+		wantCat    models.Category
 	}{
-		{"glm", "glm-4.7", "128K", "GLM 4.7"},
-		{"qwen397", "qwen3.5-397b-a17b", "128K", "Qwen 3.5 397B"},
-		{"qwen122", "qwen3.5-122b-a10b", "128K", "Qwen 3.5 122B"},
-		{"devstral", "devstral-2-123b-instruct-2512", "128K", "DevStral 2 123B"},
-		{"gptoss", "openai-gpt-oss-120b", "128K", "GPT-OSS 120B"},
-		{"qwen36", "qwen3.6-27b", "128K", "Qwen 3.6 27B"},
+		{"glm", "glm-4.7", "128K", "16K", "GLM 4.7", models.CatReasoning},
+		{"qwen397", "qwen3.5-397b-a17b", "128K", "32K", "Qwen 3.5 397B", models.CatReasoning},
+		{"qwen122", "qwen3.5-122b-a10b", "128K", "32K", "Qwen 3.5 122B", models.CatReasoning},
+		{"devstral", "devstral-2-123b-instruct-2512", "128K", "16K", "DevStral 2 123B", models.CatAgentic},
+		{"gptoss", "openai-gpt-oss-120b", "128K", "8K", "GPT-OSS 120B", models.CatLargeContext},
+		{"qwen36", "qwen3.6-27b", "128K", "16K", "Qwen 3.6 27B", models.CatGeneral},
+		{"qwen3635", "qwen3.6-35b-a3b", "128K", "16K", "Qwen 3.6 35B", models.CatAgentic},
+		{"coder", "qwen3-coder-next", "128K", "16K", "Qwen 3 Coder Next", models.CatCoder},
+		{"flash", "deepseek-v4-flash-0731", "128K", "16K", "DeepSeek V4 Flash", models.CatGeneral},
+		{"gemma4", "gemma-4-31b-it", "128K", "8K", "Gemma 4 31B", models.CatGeneral},
+		{"mistral", "mistral-medium-3.5-128b", "128K", "8K", "Mistral Medium 3.5 128B", models.CatAgentic},
+		{"medgemma", "medgemma-27b-it", "32K", "4K", "MedGemma 27B", models.CatMedical},
+		{"omni", "qwen3-omni-30b-a3b-instruct", "32K", "4K", "Qwen 3 Omni 30B", models.CatVision},
+		{"apertus", "apertus-70b-instruct-2509", "128K", "8K", "Apertus 70B", models.CatGeneral},
+		{"llama8b", "meta-llama-3.1-8b-instruct", "128K", "4K", "Meta Llama 3.1 8B", models.CatGeneral},
+		{"qwen30", "qwen3-30b-a3b-instruct-2507", "128K", "16K", "Qwen 3 30B", models.CatReasoning},
 	}
 
 	for _, tt := range tests {
@@ -75,10 +87,115 @@ func TestModelProperties(t *testing.T) {
 			if m.Ctx != tt.wantCtx {
 				t.Errorf("Ctx = %q, want %q", m.Ctx, tt.wantCtx)
 			}
+			if m.MaxOut != tt.wantMaxOut {
+				t.Errorf("MaxOut = %q, want %q", m.MaxOut, tt.wantMaxOut)
+			}
 			if m.Name != tt.wantName {
 				t.Errorf("Name = %q, want %q", m.Name, tt.wantName)
 			}
+			if m.Category != tt.wantCat {
+				t.Errorf("Category = %q, want %q", m.Category, tt.wantCat)
+			}
 		})
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Attachment / Reasoning flags
+// ---------------------------------------------------------------------------
+
+func TestAttachmentFlags(t *testing.T) {
+	attachModels := []string{
+		"qwen3.5-397b-a17b", "qwen3.5-122b-a10b", "qwen3.6-35b-a3b",
+		"gemma-4-31b-it", "medgemma-27b-it", "qwen3-omni-30b-a3b-instruct",
+	}
+	for _, id := range attachModels {
+		t.Run(id, func(t *testing.T) {
+			m := models.FindByID(id)
+			if m == nil {
+				t.Fatalf("FindByID(%q) = nil", id)
+			}
+			if !m.Attachment {
+				t.Errorf("expected Attachment=true for %q", id)
+			}
+		})
+	}
+}
+
+func TestReasoningFlags(t *testing.T) {
+	reasoningModels := []string{
+		"qwen3.5-397b-a17b", "qwen3.5-122b-a10b", "glm-4.7",
+		"devstral-2-123b-instruct-2512", "qwen3-30b-a3b-instruct-2507",
+	}
+	for _, id := range reasoningModels {
+		t.Run(id, func(t *testing.T) {
+			m := models.FindByID(id)
+			if m == nil {
+				t.Fatalf("FindByID(%q) = nil", id)
+			}
+			if !m.Reasoning {
+				t.Errorf("expected Reasoning=true for %q", id)
+			}
+		})
+	}
+}
+
+// ---------------------------------------------------------------------------
+// FilterByCategory
+// ---------------------------------------------------------------------------
+
+func TestFilterByCategory(t *testing.T) {
+	tests := []struct {
+		cat      models.Category
+		wantMin  int
+		wantName string
+	}{
+		{models.CatReasoning, 4, "qwen3.5-397b-a17b"},
+		{models.CatCoder, 1, "qwen3-coder-next"},
+		{models.CatAgentic, 3, "devstral-2-123b-instruct-2512"},
+		{models.CatMedical, 1, "medgemma-27b-it"},
+		{models.CatVision, 1, "qwen3-omni-30b-a3b-instruct"},
+		{models.CatLargeContext, 1, "openai-gpt-oss-120b"},
+		{models.CatGeneral, 5, "deepseek-v4-flash-0731"},
+	}
+	for _, tt := range tests {
+		t.Run(string(tt.cat), func(t *testing.T) {
+			out := models.FilterByCategory(tt.cat)
+			if len(out) < tt.wantMin {
+				t.Errorf("FilterByCategory(%q) = %d models, want >= %d", tt.cat, len(out), tt.wantMin)
+			}
+			found := false
+			for _, m := range out {
+				if m.ID == tt.wantName {
+					found = true
+				}
+			}
+			if !found {
+				t.Errorf("FilterByCategory(%q) missing %q", tt.cat, tt.wantName)
+			}
+		})
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Emojis
+// ---------------------------------------------------------------------------
+
+func TestReasoningEmoji(t *testing.T) {
+	if got := models.ReasoningEmoji(true); got != "✅" {
+		t.Errorf("got %q", got)
+	}
+	if got := models.ReasoningEmoji(false); got != "—" {
+		t.Errorf("got %q", got)
+	}
+}
+
+func TestAttachmentEmoji(t *testing.T) {
+	if got := models.AttachmentEmoji(true); got != "🖼" {
+		t.Errorf("got %q", got)
+	}
+	if got := models.AttachmentEmoji(false); got != "—" {
+		t.Errorf("got %q", got)
 	}
 }
 
@@ -96,6 +213,8 @@ func TestFindByID(t *testing.T) {
 		{"not found", "nonexistent", ""},
 		{"empty string", "", ""},
 		{"partial match", "glm", ""},
+		{"deepseek-v4-flash", "deepseek-v4-flash-0731", "DeepSeek V4 Flash"},
+		{"qwen-coder-next", "qwen3-coder-next", "Qwen 3 Coder Next"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -118,7 +237,7 @@ func TestFindByID(t *testing.T) {
 
 func TestFindByName(t *testing.T) {
 	tests := []struct {
-		name     string
+		name      string
 		search    string
 		wantFound bool
 		wantID    string
@@ -126,6 +245,7 @@ func TestFindByName(t *testing.T) {
 		{"found", "GLM 4.7", true, "glm-4.7"},
 		{"not found", "nonexistent", false, ""},
 		{"empty", "", false, ""},
+		{"deepseek", "DeepSeek V4 Flash", true, "deepseek-v4-flash-0731"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -173,7 +293,7 @@ func TestBuildPrompt(t *testing.T) {
 	}{
 		{"all models", models.All},
 		{"empty slice", nil},
-		{"single model", []models.Model{{ID: "x", Name: "X", Ctx: "64K"}}},
+		{"single model", []models.Model{{ID: "x", Name: "X", Ctx: "64K", MaxOut: "8K"}}},
 	}
 
 	for _, tt := range tests {
@@ -182,11 +302,14 @@ func TestBuildPrompt(t *testing.T) {
 			if !strings.Contains(got, models.ProviderName) {
 				t.Error("missing provider name")
 			}
-			if !strings.Contains(got, "### Usage") {
-				t.Error("missing usage section")
+			if !strings.Contains(got, "### Quick Switch") {
+				t.Error("missing quick switch section")
 			}
 			if !strings.Contains(got, "SAIA_API_KEY") {
 				t.Error("missing API key env var")
+			}
+			if !strings.Contains(got, "Rate Limits") {
+				t.Error("missing rate limits section")
 			}
 			for _, m := range tt.models {
 				if !strings.Contains(got, m.FullID()) {
@@ -242,9 +365,23 @@ func TestModelsJSONRoundTrip(t *testing.T) {
 		t.Fatalf("models.json has %d models, code has %d", got, want)
 	}
 
-	for i, jm := range saia.Models {
-		if jm.ID != models.All[i].ID {
-			t.Errorf("model[%d] ID: json=%q, code=%q", i, jm.ID, models.All[i].ID)
+	// Build sets for order-independent comparison
+	jsonIDs := make(map[string]bool, len(saia.Models))
+	codeIDs := make(map[string]bool, len(models.All))
+	for _, jm := range saia.Models {
+		jsonIDs[jm.ID] = true
+	}
+	for _, cm := range models.All {
+		codeIDs[cm.ID] = true
+	}
+	for id := range jsonIDs {
+		if !codeIDs[id] {
+			t.Errorf("model %q in models.json but not in code", id)
+		}
+	}
+	for id := range codeIDs {
+		if !jsonIDs[id] {
+			t.Errorf("model %q in code but not in models.json", id)
 		}
 	}
 }
@@ -254,14 +391,14 @@ func TestModelsJSONRoundTrip(t *testing.T) {
 // ---------------------------------------------------------------------------
 
 func TestModelsViaVirtualFS(t *testing.T) {
-	content, err := json.Marshal(map[string]any{
-		"additional_providers": map[string]any{
-			"saia": map[string]any{
+	content, err := json.Marshal(map[string]interface{}{
+		"additional_providers": map[string]interface{}{
+			"saia": map[string]interface{}{
 				"api":      "openai-completions",
 				"base_url": models.BaseURL,
 				"api_key_env": models.APIKeyEnv,
-				"models": []map[string]any{
-					{"id": "glm-4.7", "name": "GLM 4.7", "context_window": 131072, "reasoning": true},
+				"models": []map[string]interface{}{
+					{"id": "deepseek-v4-flash-0731", "name": "DeepSeek V4 Flash", "context_window": 131072},
 				},
 			},
 		},
@@ -288,7 +425,7 @@ func TestModelsViaVirtualFS(t *testing.T) {
 // ---------------------------------------------------------------------------
 
 func FuzzBuildPrompt(f *testing.F) {
-	f.Add([]byte(`[{"id":"a","name":"A","ctx":"1K"}]`))
+	f.Add([]byte(`[{"id":"a","name":"A","ctx":"1K","max_out":"1K"}]`))
 	f.Add([]byte(`[]`))
 
 	f.Fuzz(func(t *testing.T, data []byte) {
@@ -369,7 +506,7 @@ func TestSkillFile(t *testing.T) {
 		t.Skip("skill file not found")
 	}
 	content := string(b)
-	required := []string{"## Available Models", "saia/glm-4.7", "SAIA_API_KEY", "## Usage"}
+	required := []string{"## Available Models", "saia/glm-4.7", "SAIA_API_KEY", "## Quick Switch", "deepseek-v4-flash-0731", "Rate Limits"}
 	for _, s := range required {
 		if !strings.Contains(content, s) {
 			t.Errorf("skill file missing: %q", s)
@@ -429,5 +566,11 @@ func TestWireProtocolLifecycle(t *testing.T) {
 	}
 	if !strings.Contains(prompt, "saia/glm-4.7") {
 		t.Error("prompt missing model")
+	}
+	if !strings.Contains(prompt, "deepseek-v4-flash-0731") {
+		t.Error("prompt missing deepseek-v4-flash-0731")
+	}
+	if !strings.Contains(prompt, "Rate Limits") {
+		t.Error("prompt missing rate limits info (from PR #3)")
 	}
 }

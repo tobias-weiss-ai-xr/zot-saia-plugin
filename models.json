@@ -7,46 +7,126 @@
       "api_key_env": "SAIA_API_KEY",
       "models": [
         {
-          "id": "glm-4.7",
-          "name": "GLM 4.7 (SAIA)",
-          "context_window": 131072,
-          "max_output": 32768,
-          "reasoning": true
-        },
-        {
           "id": "qwen3.5-397b-a17b",
           "name": "Qwen 3.5 397B (SAIA)",
           "context_window": 131072,
           "max_output": 32768,
-          "reasoning": true
+          "reasoning": true,
+          "attachment": true,
+          "category": "reasoning"
         },
         {
           "id": "qwen3.5-122b-a10b",
           "name": "Qwen 3.5 122B (SAIA)",
           "context_window": 131072,
           "max_output": 32768,
-          "reasoning": true
+          "reasoning": true,
+          "attachment": true,
+          "category": "reasoning"
+        },
+        {
+          "id": "glm-4.7",
+          "name": "GLM 4.7 (SAIA)",
+          "context_window": 131072,
+          "max_output": 16384,
+          "reasoning": true,
+          "category": "agentic"
         },
         {
           "id": "devstral-2-123b-instruct-2512",
           "name": "DevStral 2 123B (SAIA)",
           "context_window": 131072,
-          "max_output": 32768,
-          "reasoning": true
+          "max_output": 16384,
+          "reasoning": true,
+          "category": "agentic"
+        },
+        {
+          "id": "mistral-medium-3.5-128b",
+          "name": "Mistral Medium 3.5 128B (SAIA)",
+          "context_window": 131072,
+          "max_output": 8192,
+          "category": "agentic"
         },
         {
           "id": "openai-gpt-oss-120b",
           "name": "GPT-OSS 120B (SAIA)",
           "context_window": 131072,
-          "max_output": 32768,
-          "reasoning": true
+          "max_output": 8192,
+          "category": "large-context"
+        },
+        {
+          "id": "qwen3.6-35b-a3b",
+          "name": "Qwen 3.6 35B (SAIA)",
+          "context_window": 131072,
+          "max_output": 16384,
+          "attachment": true,
+          "category": "agentic"
+        },
+        {
+          "id": "qwen3-coder-next",
+          "name": "Qwen 3 Coder Next (SAIA)",
+          "context_window": 131072,
+          "max_output": 16384,
+          "category": "coder"
         },
         {
           "id": "qwen3.6-27b",
           "name": "Qwen 3.6 27B (SAIA)",
           "context_window": 131072,
-          "max_output": 32768,
-          "reasoning": true
+          "max_output": 16384,
+          "category": "general"
+        },
+        {
+          "id": "qwen3-30b-a3b-instruct-2507",
+          "name": "Qwen 3 30B (SAIA)",
+          "context_window": 131072,
+          "max_output": 16384,
+          "category": "general"
+        },
+        {
+          "id": "deepseek-v4-flash-0731",
+          "name": "DeepSeek V4 Flash (SAIA)",
+          "context_window": 131072,
+          "max_output": 16384,
+          "category": "general"
+        },
+        {
+          "id": "gemma-4-31b-it",
+          "name": "Gemma 4 31B (SAIA)",
+          "context_window": 131072,
+          "max_output": 8192,
+          "attachment": true,
+          "category": "general"
+        },
+        {
+          "id": "apertus-70b-instruct-2509",
+          "name": "Apertus 70B (SAIA)",
+          "context_window": 131072,
+          "max_output": 8192,
+          "category": "general"
+        },
+        {
+          "id": "meta-llama-3.1-8b-instruct",
+          "name": "Meta Llama 3.1 8B (SAIA)",
+          "context_window": 131072,
+          "max_output": 4096,
+          "category": "general"
+        },
+        {
+          "id": "medgemma-27b-it",
+          "name": "MedGemma 27B (SAIA)",
+          "context_window": 32768,
+          "max_output": 4096,
+          "attachment": true,
+          "category": "medical"
+        },
+        {
+          "id": "qwen3-omni-30b-a3b-instruct",
+          "name": "Qwen 3 Omni 30B (SAIA)",
+          "context_window": 32768,
+          "max_output": 4096,
+          "attachment": true,
+          "category": "vision"
         }
       ]
     }
