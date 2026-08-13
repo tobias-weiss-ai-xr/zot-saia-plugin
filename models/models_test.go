@@ -60,7 +60,7 @@ func TestModelProperties(t *testing.T) {
 		wantName   string
 		wantCat    models.Category
 	}{
-		{"glm", "glm-4.7", "128K", "16K", "GLM 4.7", models.CatReasoning},
+		{"glm", "glm-4.7", "128K", "16K", "GLM 4.7", models.CatGeneral},
 		{"qwen397", "qwen3.5-397b-a17b", "128K", "32K", "Qwen 3.5 397B", models.CatReasoning},
 		{"qwen122", "qwen3.5-122b-a10b", "128K", "32K", "Qwen 3.5 122B", models.CatReasoning},
 		{"devstral", "devstral-2-123b-instruct-2512", "128K", "16K", "DevStral 2 123B", models.CatAgentic},
@@ -124,8 +124,8 @@ func TestAttachmentFlags(t *testing.T) {
 
 func TestReasoningFlags(t *testing.T) {
 	reasoningModels := []string{
-		"qwen3.5-397b-a17b", "qwen3.5-122b-a10b", "glm-4.7",
-		"devstral-2-123b-instruct-2512", "qwen3-30b-a3b-instruct-2507",
+		"qwen3.5-397b-a17b", "qwen3.5-122b-a10b",
+		"qwen3-30b-a3b-instruct-2507",
 	}
 	for _, id := range reasoningModels {
 		t.Run(id, func(t *testing.T) {
@@ -150,7 +150,7 @@ func TestFilterByCategory(t *testing.T) {
 		wantMin  int
 		wantName string
 	}{
-		{models.CatReasoning, 4, "qwen3.5-397b-a17b"},
+		{models.CatReasoning, 3, "qwen3.5-397b-a17b"},
 		{models.CatCoder, 1, "qwen3-coder-next"},
 		{models.CatAgentic, 3, "devstral-2-123b-instruct-2512"},
 		{models.CatMedical, 1, "medgemma-27b-it"},
