@@ -9,6 +9,11 @@ A self-contained Go extension for zot that auto-registers all **SAIA Academic Cl
 
 Ported from [pi-saia-plugin](https://github.com/tobias-weiss-ai-xr/pi-saia-plugin).
 
+**Other Platforms:**
+- [opencode-saia-plugin](https://github.com/tobias-weiss-ai-xr/opencode-saia-plugin) — SAIA provider for OpenCode
+- [pi-saia-plugin](https://github.com/tobias-weiss-ai-xr/pi-saia-plugin) — SAIA provider for pi coding agent
+- [pi-l1-cache](https://github.com/tobias-weiss-ai-xr/pi-l1-cache) — Optional L1 caching extension for pi
+
 ## Features
 
 - **Self-contained Go binary** — single static executable, no runtime dependencies
