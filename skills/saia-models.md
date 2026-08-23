@@ -4,7 +4,7 @@ description: SAIA (Academic Cloud Hessen) models available via the zot-saia-plug
 
 # SAIA Academic Cloud Models
 
-This plugin registers the SAIA provider with 16 models hosted on the Academic Cloud Hessen infrastructure.
+This plugin registers the SAIA provider with 16 models hosted on the Academic Cloud Hessen infrastructure. The catalog auto-syncs with the live SAIA API (cached via L0/L1).
 
 ## Available Models
 
@@ -12,9 +12,9 @@ This plugin registers the SAIA provider with 16 models hosted on the Academic Cl
 |----------|------|-----|-----|-----------|--------|----------|
 | `saia/qwen3.5-397b-a17b` | Qwen 3.5 397B | 128K | 32K | ✅ | 🖼 | reasoning |
 | `saia/qwen3.5-122b-a10b` | Qwen 3.5 122B | 128K | 32K | ✅ | 🖼 | reasoning |
-| `saia/glm-4.7` | GLM 4.7 | 128K | 16K | ✅ | — | reasoning |
-| `saia/qwen3-30b-a3b-instruct-2507` | Qwen 3 30B | 128K | 16K | ✅ | — | reasoning |
-| `saia/devstral-2-123b-instruct-2512` | DevStral 2 123B | 128K | 16K | ✅ | — | agentic |
+| `saia/glm-4.7` | GLM 4.7 | 128K | 16K | — | — | general |
+| `saia/qwen3-30b-a3b-instruct-2507` | Qwen 3 30B | 128K | 16K | — | — | general |
+| `saia/devstral-2-123b-instruct-2512` | DevStral 2 123B | 128K | 16K | — | — | agentic |
 | `saia/mistral-medium-3.5-128b` | Mistral Medium 3.5 128B | 128K | 8K | — | — | agentic |
 | `saia/qwen3.6-35b-a3b` | Qwen 3.6 35B | 128K | 16K | — | 🖼 | agentic |
 | `saia/qwen3-coder-next` | Qwen 3 Coder Next | 128K | 16K | — | — | coder |
@@ -49,10 +49,24 @@ zot --provider saia --model qwen3.6-35b-a3b
 zot --provider saia --model meta-llama-3.1-8b-instruct
 ```
 
-With the extension installed, use the slash command:
+With the extension installed, use the slash commands:
 ```
-/saia-models
+/saia-models        # list models & usage
+/saia-models refresh# force a fresh catalog refresh, then list
+/saia-sync          # refresh model catalog from the live API (cached)
+/saia-sync force    # bypass the cache and force a fresh refresh
+/saia-cache         # show L0/L1 cache stats
+/saia-cache clear   # clear L0 + L1 cache
 ```
+
+## Caching
+
+The plugin caches the model catalog (not the chat responses) using two optional tiers:
+
+- **L0** — in-memory, 5-minute TTL (`SAIA_CACHE_L0=false` to disable)
+- **L1** — disk at `~/.cache/saia/`, 24-hour TTL (`SAIA_CACHE_L1=false` to disable)
+
+On a cache hit the catalog is used directly; on a miss the live API is queried and the result is cached.
 
 ## Rate Limits
 

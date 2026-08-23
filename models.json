@@ -29,15 +29,13 @@
           "name": "GLM 4.7 (SAIA)",
           "context_window": 131072,
           "max_output": 16384,
-          "reasoning": true,
-          "category": "agentic"
+          "category": "general"
         },
         {
           "id": "devstral-2-123b-instruct-2512",
           "name": "DevStral 2 123B (SAIA)",
           "context_window": 131072,
           "max_output": 16384,
-          "reasoning": true,
           "category": "agentic"
         },
         {

@@ -1,6 +1,6 @@
 {
   "name": "zot-saia-plugin",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "exec": "./zot-saia-plugin",
   "language": "go",
   "description": "SAIA Academic Cloud provider — registers /saia-models slash command",

@@ -12,15 +12,46 @@ Ported from [pi-saia-plugin](https://github.com/tobias-weiss-ai-xr/pi-saia-plugi
 **Other Platforms:**
 - [opencode-saia-plugin](https://github.com/tobias-weiss-ai-xr/opencode-saia-plugin) — SAIA provider for OpenCode
 - [pi-saia-plugin](https://github.com/tobias-weiss-ai-xr/pi-saia-plugin) — SAIA provider for pi coding agent
-- [pi-l1-cache](https://github.com/tobias-weiss-ai-xr/pi-l1-cache) — Optional L1 caching extension for pi
 
 ## Features
 
 - **Self-contained Go binary** — single static executable, no runtime dependencies
-- **Auto-registration** — `models.json` adds all 6 SAIA models on startup
-- **Slash command** — `/saia-models` lists available models and usage
+- **Auto-registration** — `models.json` adds all 16 SAIA models on startup
+- **Model auto-update** — fetches the live model catalog on load and syncs with the API (cached)
+- **L0/L1 caching** — optional in-memory + disk cache, same semantics as the pi/opencode plugins
+- **Slash commands** — `/saia-models`, `/saia-sync`, `/saia-cache`
 - **Skill included** — `SKILL.md` documents models, API key setup, and examples
 - **OpenAI-compatible** — Uses standard OpenAI completions API
+
+## Caching
+
+The plugin ships with optional **L0 (in-memory)** and **L1 (disk)** caching, mirroring the
+behaviour of the pi and opencode plugins:
+
+- **L0** — in-memory, 5-minute TTL (fastest)
+- **L1** — disk (`~/.cache/saia/`), 24-hour TTL
+- Lookup priority: L0 → L1 → live API; an L1 hit primes L0
+
+| Environment variable | Default | Effect |
+|---|---|---|
+| `SAIA_CACHE_L0=false` | enabled | Disables the in-memory tier |
+| `SAIA_CACHE_L1=false` | enabled | Disables the disk tier |
+
+```bash
+/saia-cache        # show cache stats
+/saia-cache clear  # clear L0 + L1
+```
+
+## Model auto-update
+
+The plugin refreshes the model catalog from the live SAIA `/v1/models` endpoint:
+
+- Automatically on plugin load (cache-aware, safe without an API key)
+- On demand with `/saia-sync` (or `/saia-sync force` to bypass the cache)
+- `/saia-models refresh` also forces a refresh
+
+New models are added, removed models are dropped, and reasoning/attachment flags are
+re-derived from the live API (`output`/`input` modalities).
 
 ## Quick Start
 
@@ -47,7 +78,11 @@ zot ext install .
 Then restart zot and use:
 
 ```
-/saia-models
+/saia-models        # list models & usage
+/saia-sync          # refresh model catalog (cached)
+/saia-sync force    # force a fresh refresh
+/saia-cache         # show cache stats
+/saia-cache clear   # clear the cache
 ```
 
 ### API Key
@@ -93,6 +128,14 @@ zot --provider saia --model glm-4.7
 zot-saia-plugin/
 ├── cmd/zot-saia-plugin/
 │   └── main.go              # Extension binary (uses zot Go SDK)
+├── cache/
+│   ├── cache.go             # L0/L1 caching
+│   └── cache_test.go        # cache tests
+├── models/
+│   ├── models.go            # Model catalog + prompt builder
+│   ├── sync.go              # Model auto-update from live API
+│   ├── sync_test.go         # sync tests
+│   └── models_test.go        # catalog tests
 ├── skills/
 │   └── saia-models.md      # Model documentation skill
 ├── models.json              # Custom provider + model definitions

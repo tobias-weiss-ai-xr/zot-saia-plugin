@@ -31,19 +31,17 @@ type Model struct {
 	Category   Category
 }
 
-// All known models served by SAIA (synced with live API).
+// All known models served by SAIA (synced with live API 2025-08-22).
 var All = []Model{
-	// Reasoning
+	// Reasoning (output includes "thought")
 	{ID: "qwen3.5-397b-a17b", Name: "Qwen 3.5 397B", Ctx: "128K", MaxOut: "32K", Reasoning: true, Attachment: true, Category: CatReasoning},
 	{ID: "qwen3.5-122b-a10b", Name: "Qwen 3.5 122B", Ctx: "128K", MaxOut: "32K", Reasoning: true, Attachment: true, Category: CatReasoning},
-	{ID: "glm-4.7", Name: "GLM 4.7", Ctx: "128K", MaxOut: "16K", Reasoning: false, Category: CatGeneral},
-	{ID: "qwen3-30b-a3b-instruct-2507", Name: "Qwen 3 30B", Ctx: "128K", MaxOut: "16K", Reasoning: true, Category: CatReasoning},
 
 	// Coder
 	{ID: "qwen3-coder-next", Name: "Qwen 3 Coder Next", Ctx: "128K", MaxOut: "16K", Category: CatCoder},
 
 	// Agentic
-	{ID: "devstral-2-123b-instruct-2512", Name: "DevStral 2 123B", Ctx: "128K", MaxOut: "16K", Reasoning: false, Category: CatAgentic},
+	{ID: "devstral-2-123b-instruct-2512", Name: "DevStral 2 123B", Ctx: "128K", MaxOut: "16K", Category: CatAgentic},
 	{ID: "mistral-medium-3.5-128b", Name: "Mistral Medium 3.5 128B", Ctx: "128K", MaxOut: "8K", Category: CatAgentic},
 	{ID: "qwen3.6-35b-a3b", Name: "Qwen 3.6 35B", Ctx: "128K", MaxOut: "16K", Attachment: true, Category: CatAgentic},
 
@@ -57,6 +55,8 @@ var All = []Model{
 	{ID: "qwen3-omni-30b-a3b-instruct", Name: "Qwen 3 Omni 30B", Ctx: "32K", MaxOut: "4K", Attachment: true, Category: CatVision},
 
 	// General
+	{ID: "glm-4.7", Name: "GLM 4.7", Ctx: "128K", MaxOut: "16K", Category: CatGeneral},
+	{ID: "qwen3-30b-a3b-instruct-2507", Name: "Qwen 3 30B", Ctx: "128K", MaxOut: "16K", Category: CatGeneral},
 	{ID: "deepseek-v4-flash-0731", Name: "DeepSeek V4 Flash", Ctx: "128K", MaxOut: "16K", Category: CatGeneral},
 	{ID: "qwen3.6-27b", Name: "Qwen 3.6 27B", Ctx: "128K", MaxOut: "16K", Category: CatGeneral},
 	{ID: "gemma-4-31b-it", Name: "Gemma 4 31B", Ctx: "128K", MaxOut: "8K", Attachment: true, Category: CatGeneral},

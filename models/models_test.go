@@ -75,7 +75,7 @@ func TestModelProperties(t *testing.T) {
 		{"omni", "qwen3-omni-30b-a3b-instruct", "32K", "4K", "Qwen 3 Omni 30B", models.CatVision},
 		{"apertus", "apertus-70b-instruct-2509", "128K", "8K", "Apertus 70B", models.CatGeneral},
 		{"llama8b", "meta-llama-3.1-8b-instruct", "128K", "4K", "Meta Llama 3.1 8B", models.CatGeneral},
-		{"qwen30", "qwen3-30b-a3b-instruct-2507", "128K", "16K", "Qwen 3 30B", models.CatReasoning},
+		{"qwen30", "qwen3-30b-a3b-instruct-2507", "128K", "16K", "Qwen 3 30B", models.CatGeneral},
 	}
 
 	for _, tt := range tests {
@@ -125,7 +125,6 @@ func TestAttachmentFlags(t *testing.T) {
 func TestReasoningFlags(t *testing.T) {
 	reasoningModels := []string{
 		"qwen3.5-397b-a17b", "qwen3.5-122b-a10b",
-		"qwen3-30b-a3b-instruct-2507",
 	}
 	for _, id := range reasoningModels {
 		t.Run(id, func(t *testing.T) {
@@ -150,13 +149,13 @@ func TestFilterByCategory(t *testing.T) {
 		wantMin  int
 		wantName string
 	}{
-		{models.CatReasoning, 3, "qwen3.5-397b-a17b"},
+		{models.CatReasoning, 2, "qwen3.5-397b-a17b"},
 		{models.CatCoder, 1, "qwen3-coder-next"},
 		{models.CatAgentic, 3, "devstral-2-123b-instruct-2512"},
 		{models.CatMedical, 1, "medgemma-27b-it"},
 		{models.CatVision, 1, "qwen3-omni-30b-a3b-instruct"},
 		{models.CatLargeContext, 1, "openai-gpt-oss-120b"},
-		{models.CatGeneral, 5, "deepseek-v4-flash-0731"},
+		{models.CatGeneral, 6, "deepseek-v4-flash-0731"},
 	}
 	for _, tt := range tests {
 		t.Run(string(tt.cat), func(t *testing.T) {
@@ -545,15 +544,28 @@ func TestWireProtocolLifecycle(t *testing.T) {
 	}
 
 	found := false
+	foundSync := false
+	foundCache := false
 	for _, f := range sess.Out {
 		if f["type"] == "register_command" {
-			if name, _ := f["name"].(string); name == "saia-models" {
+			switch name, _ := f["name"].(string); name {
+			case "saia-models":
 				found = true
+			case "saia-sync":
+				foundSync = true
+			case "saia-cache":
+				foundCache = true
 			}
 		}
 	}
 	if !found {
 		t.Error("/saia-models command not registered")
+	}
+	if !foundSync {
+		t.Error("/saia-sync command not registered")
+	}
+	if !foundCache {
+		t.Error("/saia-cache command not registered")
 	}
 
 	resp := sess.InvokeCommand("saia-models", "")
@@ -572,5 +584,25 @@ func TestWireProtocolLifecycle(t *testing.T) {
 	}
 	if !strings.Contains(prompt, "Rate Limits") {
 		t.Error("prompt missing rate limits info (from PR #3)")
+	}
+
+	// /saia-cache should reply with cache status (display action).
+	cacheResp := sess.InvokeCommand("saia-cache", "")
+	if action, _ := cacheResp["action"].(string); action != "display" {
+		t.Errorf("saia-cache response action = %q, want display", action)
+	}
+	cacheDisplay, _ := cacheResp["display"].(string)
+	if !strings.Contains(cacheDisplay, "L0") || !strings.Contains(cacheDisplay, "L1") {
+		t.Error("saia-cache display missing L0/L1 stats")
+	}
+
+	// /saia-cache clear should reset both tiers.
+	clearResp := sess.InvokeCommand("saia-cache", "clear")
+	if action, _ := clearResp["action"].(string); action != "display" {
+		t.Errorf("saia-cache clear response action = %q, want display", action)
+	}
+	clearDisplay, _ := clearResp["display"].(string)
+	if !strings.Contains(clearDisplay, "cleared") {
+		t.Error("saia-cache clear should mention cleared")
 	}
 }
