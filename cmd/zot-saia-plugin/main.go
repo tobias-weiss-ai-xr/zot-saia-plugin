@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	e := ext.New("zot-saia-plugin", "1.2.0")
+	e := ext.New("zot-saia-plugin", "1.3.0")
 
 	// Auto-update: when the extension loads, attempt a (cached) refresh of
 	// the model catalog from the live SAIA API. On a cache hit this is a

@@ -3,6 +3,7 @@ package models_test
 import (
 	"encoding/json"
 	"flag"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -26,7 +27,7 @@ var (
 // ---------------------------------------------------------------------------
 
 func TestAllModelsCount(t *testing.T) {
-	if got, want := len(models.All), 16; got != want {
+	if got, want := len(models.All), 14; got != want {
 		t.Fatalf("expected %d models, got %d", want, got)
 	}
 }
@@ -60,22 +61,20 @@ func TestModelProperties(t *testing.T) {
 		wantName   string
 		wantCat    models.Category
 	}{
-		{"glm", "glm-4.7", "128K", "16K", "GLM 4.7", models.CatGeneral},
-		{"qwen397", "qwen3.5-397b-a17b", "128K", "32K", "Qwen 3.5 397B", models.CatReasoning},
-		{"qwen122", "qwen3.5-122b-a10b", "128K", "32K", "Qwen 3.5 122B", models.CatReasoning},
-		{"devstral", "devstral-2-123b-instruct-2512", "128K", "16K", "DevStral 2 123B", models.CatAgentic},
+		{"deepseek", "deepseek-v4-flash-0731", "1M", "32K", "DeepSeek V4 Flash 0731", models.CatGeneral},
+		{"glm53", "glm-5.3-flash", "1M", "32K", "GLM 5.3 Flash", models.CatAgentic},
+		{"qwen397", "qwen3.5-397b-a17b", "256K", "32K", "Qwen 3.5 397B A17B", models.CatReasoning},
+		{"qwen835", "qwen3.6-35b-a3b", "262K", "16K", "Qwen 3.6 35B A3B", models.CatAgentic},
+		{"qwen827", "qwen3.8-27b", "262K", "32K", "Qwen 3.8 27B", models.CatReasoning},
+		{"coder", "qwen3-coder-next", "256K", "16K", "Qwen 3 Coder Next", models.CatCoder},
+		{"devstral", "devstral-2-123b-instruct-2512", "256K", "16K", "DevStral 2 123B", models.CatAgentic},
+		{"mistral", "mistral-medium-3.5-128b", "256K", "8K", "Mistral Medium 3.5 128B", models.CatAgentic},
 		{"gptoss", "openai-gpt-oss-120b", "128K", "8K", "GPT-OSS 120B", models.CatLargeContext},
-		{"qwen36", "qwen3.6-27b", "128K", "16K", "Qwen 3.6 27B", models.CatGeneral},
-		{"qwen3635", "qwen3.6-35b-a3b", "128K", "16K", "Qwen 3.6 35B", models.CatAgentic},
-		{"coder", "qwen3-coder-next", "128K", "16K", "Qwen 3 Coder Next", models.CatCoder},
-		{"flash", "deepseek-v4-flash-0731", "128K", "16K", "DeepSeek V4 Flash", models.CatGeneral},
-		{"gemma4", "gemma-4-31b-it", "128K", "8K", "Gemma 4 31B", models.CatGeneral},
-		{"mistral", "mistral-medium-3.5-128b", "128K", "8K", "Mistral Medium 3.5 128B", models.CatAgentic},
-		{"medgemma", "medgemma-27b-it", "32K", "4K", "MedGemma 27B", models.CatMedical},
-		{"omni", "qwen3-omni-30b-a3b-instruct", "32K", "4K", "Qwen 3 Omni 30B", models.CatVision},
-		{"apertus", "apertus-70b-instruct-2509", "128K", "8K", "Apertus 70B", models.CatGeneral},
-		{"llama8b", "meta-llama-3.1-8b-instruct", "128K", "4K", "Meta Llama 3.1 8B", models.CatGeneral},
-		{"qwen30", "qwen3-30b-a3b-instruct-2507", "128K", "16K", "Qwen 3 30B", models.CatGeneral},
+		{"omni", "qwen3-omni-30b-a3b-instruct", "256K", "4K", "Qwen 3 Omni 30B", models.CatVision},
+		{"gemma4", "gemma-4-31b-it", "256K", "8K", "Gemma 4 31B", models.CatGeneral},
+		{"qwen30", "qwen3-30b-a3b-instruct-2507", "256K", "16K", "Qwen 3 30B A3B", models.CatGeneral},
+		{"apertus", "apertus-70b-instruct-2509", "65K", "8K", "Apertus 70B", models.CatGeneral},
+		{"llama8b", "meta-llama-3.1-8b-instruct", "128K", "4K", "Llama 3.1 8B", models.CatGeneral},
 	}
 
 	for _, tt := range tests {
@@ -101,13 +100,143 @@ func TestModelProperties(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
+// Facts-as-source guard: the shipped catalog must mirror data/saia-models.json
+// ---------------------------------------------------------------------------
+
+// TestCatalogMatchesFacts reads data/saia-models.json (the canonical collected
+// facts) and asserts models.All agrees with it on model set, context window,
+// max output, reasoning, attachment and category. This guarantees the Go
+// catalog cannot silently drift from the live SAIA facts.
+func TestCatalogMatchesFacts(t *testing.T) {
+	b, err := os.ReadFile("../data/saia-models.json")
+	if err != nil {
+		t.Skip("data/saia-models.json not found")
+	}
+	var facts struct {
+		Models []struct {
+			ID        string `json:"id"`
+			MaxOutput int    `json:"max_output"`
+			Category  string `json:"category"`
+			Reasoning *struct {
+				Supported bool `json:"supported"`
+			} `json:"reasoning"`
+			Input         []string `json:"input"`
+			ContextWindow struct {
+				Tokens int64 `json:"tokens"`
+			} `json:"context_window"`
+		} `json:"models"`
+	}
+	if err := json.Unmarshal(b, &facts); err != nil {
+		t.Fatalf("parse data/saia-models.json: %v", err)
+	}
+
+	byID := make(map[string]models.Model, len(models.All))
+	for _, m := range models.All {
+		byID[m.ID] = m
+	}
+
+	if got, want := len(models.All), len(facts.Models); got != want {
+		t.Fatalf("All has %d models, facts have %d", got, want)
+	}
+
+	for _, f := range facts.Models {
+		m, ok := byID[f.ID]
+		if !ok {
+			t.Errorf("model %q in facts but missing from models.All", f.ID)
+			continue
+		}
+		if int64(modelCtxToInt(m.Ctx)) != f.ContextWindow.Tokens {
+			t.Errorf("model %q: Ctx %q does not match facts ctx %d", f.ID, m.Ctx, f.ContextWindow.Tokens)
+		}
+		if m.MaxOut != maxOutLabel(f.MaxOutput) {
+			t.Errorf("model %q: MaxOut %q does not match facts max_output %d", f.ID, m.MaxOut, f.MaxOutput)
+		}
+		wantReasoning := f.Reasoning != nil && f.Reasoning.Supported
+		if m.Reasoning != wantReasoning {
+			t.Errorf("model %q: Reasoning=%v, facts=%v", f.ID, m.Reasoning, wantReasoning)
+		}
+		wantAttach := attachmentFromInput(f.Input)
+		if m.Attachment != wantAttach {
+			t.Errorf("model %q: Attachment=%v, facts=%v", f.ID, m.Attachment, wantAttach)
+		}
+		if wantCat, ok := catFromString(f.Category); ok && m.Category != wantCat {
+			t.Errorf("model %q: Category=%q, facts=%q", f.ID, m.Category, f.Category)
+		}
+	}
+}
+
+// modelCtxToInt converts a shorthand like "256K" / "1M" / "65K" back to
+// token count for comparison with data/saia-models.json.
+func modelCtxToInt(ctx string) int {
+	if len(ctx) == 0 {
+		return 0
+	}
+	mult := 1
+	switch ctx[len(ctx)-1] {
+	case 'K':
+		mult = 1000
+		ctx = ctx[:len(ctx)-1]
+	case 'M':
+		mult = 1000000
+		ctx = ctx[:len(ctx)-1]
+	default:
+		mult = 1
+	}
+	n := 0
+	for _, r := range ctx {
+		if r < '0' || r > '9' {
+			return 0
+		}
+		n = n*10 + int(r-'0')
+	}
+	return n * mult
+}
+
+// maxOutLabel formats a max-output token count as the "NNK" label.
+func maxOutLabel(tokens int) string {
+	return fmt.Sprintf("%dK", tokens/1000)
+}
+
+// attachmentFromInput reports whether a model accepts a non-text modality.
+func attachmentFromInput(input []string) bool {
+	for _, m := range input {
+		if m != "text" {
+			return true
+		}
+	}
+	return false
+}
+
+// catFromString maps a fact category to a models.Category.
+func catFromString(s string) (models.Category, bool) {
+	switch s {
+	case "reasoning":
+		return models.CatReasoning, true
+	case "coder":
+		return models.CatCoder, true
+	case "agentic":
+		return models.CatAgentic, true
+	case "vision":
+		return models.CatVision, true
+	case "medical":
+		return models.CatMedical, true
+	case "large-context":
+		return models.CatLargeContext, true
+	case "general":
+		return models.CatGeneral, true
+	default:
+		return "", false
+	}
+}
+
+// ---------------------------------------------------------------------------
 // Attachment / Reasoning flags
 // ---------------------------------------------------------------------------
 
 func TestAttachmentFlags(t *testing.T) {
 	attachModels := []string{
-		"qwen3.5-397b-a17b", "qwen3.5-122b-a10b", "qwen3.6-35b-a3b",
-		"gemma-4-31b-it", "medgemma-27b-it", "qwen3-omni-30b-a3b-instruct",
+		"qwen3.5-397b-a17b", "qwen3.6-35b-a3b", "glm-5.3-flash",
+		"gemma-4-31b-it", "qwen3-omni-30b-a3b-instruct",
 	}
 	for _, id := range attachModels {
 		t.Run(id, func(t *testing.T) {
@@ -124,7 +253,8 @@ func TestAttachmentFlags(t *testing.T) {
 
 func TestReasoningFlags(t *testing.T) {
 	reasoningModels := []string{
-		"qwen3.5-397b-a17b", "qwen3.5-122b-a10b",
+		"qwen3.5-397b-a17b", "qwen3.6-35b-a3b", "glm-5.3-flash",
+		"deepseek-v4-flash-0731", "qwen3.8-27b", "openai-gpt-oss-120b",
 	}
 	for _, id := range reasoningModels {
 		t.Run(id, func(t *testing.T) {
@@ -151,11 +281,10 @@ func TestFilterByCategory(t *testing.T) {
 	}{
 		{models.CatReasoning, 2, "qwen3.5-397b-a17b"},
 		{models.CatCoder, 1, "qwen3-coder-next"},
-		{models.CatAgentic, 3, "devstral-2-123b-instruct-2512"},
-		{models.CatMedical, 1, "medgemma-27b-it"},
+		{models.CatAgentic, 4, "devstral-2-123b-instruct-2512"},
 		{models.CatVision, 1, "qwen3-omni-30b-a3b-instruct"},
 		{models.CatLargeContext, 1, "openai-gpt-oss-120b"},
-		{models.CatGeneral, 6, "deepseek-v4-flash-0731"},
+		{models.CatGeneral, 5, "deepseek-v4-flash-0731"},
 	}
 	for _, tt := range tests {
 		t.Run(string(tt.cat), func(t *testing.T) {
@@ -208,11 +337,11 @@ func TestFindByID(t *testing.T) {
 		id   string
 		want string // empty = nil
 	}{
-		{"found", "glm-4.7", "GLM 4.7"},
+		{"found", "glm-5.3-flash", "GLM 5.3 Flash"},
 		{"not found", "nonexistent", ""},
 		{"empty string", "", ""},
 		{"partial match", "glm", ""},
-		{"deepseek-v4-flash", "deepseek-v4-flash-0731", "DeepSeek V4 Flash"},
+		{"deepseek-v4-flash", "deepseek-v4-flash-0731", "DeepSeek V4 Flash 0731"},
 		{"qwen-coder-next", "qwen3-coder-next", "Qwen 3 Coder Next"},
 	}
 	for _, tt := range tests {
@@ -241,10 +370,10 @@ func TestFindByName(t *testing.T) {
 		wantFound bool
 		wantID    string
 	}{
-		{"found", "GLM 4.7", true, "glm-4.7"},
+		{"found", "GLM 5.3 Flash", true, "glm-5.3-flash"},
 		{"not found", "nonexistent", false, ""},
 		{"empty", "", false, ""},
-		{"deepseek", "DeepSeek V4 Flash", true, "deepseek-v4-flash-0731"},
+		{"deepseek", "DeepSeek V4 Flash 0731", true, "deepseek-v4-flash-0731"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -364,7 +493,6 @@ func TestModelsJSONRoundTrip(t *testing.T) {
 		t.Fatalf("models.json has %d models, code has %d", got, want)
 	}
 
-	// Build sets for order-independent comparison
 	jsonIDs := make(map[string]bool, len(saia.Models))
 	codeIDs := make(map[string]bool, len(models.All))
 	for _, jm := range saia.Models {
@@ -393,11 +521,11 @@ func TestModelsViaVirtualFS(t *testing.T) {
 	content, err := json.Marshal(map[string]interface{}{
 		"additional_providers": map[string]interface{}{
 			"saia": map[string]interface{}{
-				"api":      "openai-completions",
-				"base_url": models.BaseURL,
+				"api":         "openai-completions",
+				"base_url":    models.BaseURL,
 				"api_key_env": models.APIKeyEnv,
 				"models": []map[string]interface{}{
-					{"id": "deepseek-v4-flash-0731", "name": "DeepSeek V4 Flash", "context_window": 131072},
+					{"id": "deepseek-v4-flash-0731", "name": "DeepSeek V4 Flash 0731", "context_window": 131072},
 				},
 			},
 		},
@@ -505,7 +633,7 @@ func TestSkillFile(t *testing.T) {
 		t.Skip("skill file not found")
 	}
 	content := string(b)
-	required := []string{"## Available Models", "saia/glm-4.7", "SAIA_API_KEY", "## Quick Switch", "deepseek-v4-flash-0731", "Rate Limits"}
+	required := []string{"## Available Models", "saia/glm-5.3-flash", "SAIA_API_KEY", "## Quick Switch", "deepseek-v4-flash-0731", "Rate Limits"}
 	for _, s := range required {
 		if !strings.Contains(content, s) {
 			t.Errorf("skill file missing: %q", s)
@@ -576,7 +704,7 @@ func TestWireProtocolLifecycle(t *testing.T) {
 	if !strings.Contains(prompt, "SAIA") {
 		t.Error("prompt missing provider name")
 	}
-	if !strings.Contains(prompt, "saia/glm-4.7") {
+	if !strings.Contains(prompt, "saia/glm-5.3-flash") {
 		t.Error("prompt missing model")
 	}
 	if !strings.Contains(prompt, "deepseek-v4-flash-0731") {

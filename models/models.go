@@ -32,36 +32,34 @@ type Model struct {
 }
 
 // All known models served by SAIA (synced with live API 2025-08-22).
+// All known models served by SAIA, generated from data/saia-models.json
+// (the canonical collected facts; models_test.go guards drift from facts).
 var All = []Model{
 	// Reasoning (output includes "thought")
-	{ID: "qwen3.5-397b-a17b", Name: "Qwen 3.5 397B", Ctx: "128K", MaxOut: "32K", Reasoning: true, Attachment: true, Category: CatReasoning},
-	{ID: "qwen3.5-122b-a10b", Name: "Qwen 3.5 122B", Ctx: "128K", MaxOut: "32K", Reasoning: true, Attachment: true, Category: CatReasoning},
+	{ID: "deepseek-v4-flash-0731", Name: "DeepSeek V4 Flash 0731", Ctx: "1M", MaxOut: "32K", Reasoning: true, Category: CatGeneral},
+	{ID: "glm-5.3-flash", Name: "GLM 5.3 Flash", Ctx: "1M", MaxOut: "32K", Reasoning: true, Attachment: true, Category: CatAgentic},
+	{ID: "qwen3.5-397b-a17b", Name: "Qwen 3.5 397B A17B", Ctx: "256K", MaxOut: "32K", Reasoning: true, Attachment: true, Category: CatReasoning},
+	{ID: "qwen3.6-35b-a3b", Name: "Qwen 3.6 35B A3B", Ctx: "262K", MaxOut: "16K", Reasoning: true, Attachment: true, Category: CatAgentic},
+	{ID: "qwen3.8-27b", Name: "Qwen 3.8 27B", Ctx: "262K", MaxOut: "32K", Reasoning: true, Category: CatReasoning},
 
 	// Coder
-	{ID: "qwen3-coder-next", Name: "Qwen 3 Coder Next", Ctx: "128K", MaxOut: "16K", Category: CatCoder},
+	{ID: "qwen3-coder-next", Name: "Qwen 3 Coder Next", Ctx: "256K", MaxOut: "16K", Category: CatCoder},
 
 	// Agentic
-	{ID: "devstral-2-123b-instruct-2512", Name: "DevStral 2 123B", Ctx: "128K", MaxOut: "16K", Category: CatAgentic},
-	{ID: "mistral-medium-3.5-128b", Name: "Mistral Medium 3.5 128B", Ctx: "128K", MaxOut: "8K", Category: CatAgentic},
-	{ID: "qwen3.6-35b-a3b", Name: "Qwen 3.6 35B", Ctx: "128K", MaxOut: "16K", Attachment: true, Category: CatAgentic},
+	{ID: "devstral-2-123b-instruct-2512", Name: "DevStral 2 123B", Ctx: "256K", MaxOut: "16K", Category: CatAgentic},
+	{ID: "mistral-medium-3.5-128b", Name: "Mistral Medium 3.5 128B", Ctx: "256K", MaxOut: "8K", Category: CatAgentic},
 
 	// Large Context
-	{ID: "openai-gpt-oss-120b", Name: "GPT-OSS 120B", Ctx: "128K", MaxOut: "8K", Category: CatLargeContext},
+	{ID: "openai-gpt-oss-120b", Name: "GPT-OSS 120B", Ctx: "128K", MaxOut: "8K", Reasoning: true, Category: CatLargeContext},
 
-	// Medical
-	{ID: "medgemma-27b-it", Name: "MedGemma 27B", Ctx: "32K", MaxOut: "4K", Attachment: true, Category: CatMedical},
-
-	// Vision
-	{ID: "qwen3-omni-30b-a3b-instruct", Name: "Qwen 3 Omni 30B", Ctx: "32K", MaxOut: "4K", Attachment: true, Category: CatVision},
+	// Vision (image/audio input)
+	{ID: "qwen3-omni-30b-a3b-instruct", Name: "Qwen 3 Omni 30B", Ctx: "256K", MaxOut: "4K", Attachment: true, Category: CatVision},
 
 	// General
-	{ID: "glm-4.7", Name: "GLM 4.7", Ctx: "128K", MaxOut: "16K", Category: CatGeneral},
-	{ID: "qwen3-30b-a3b-instruct-2507", Name: "Qwen 3 30B", Ctx: "128K", MaxOut: "16K", Category: CatGeneral},
-	{ID: "deepseek-v4-flash-0731", Name: "DeepSeek V4 Flash", Ctx: "128K", MaxOut: "16K", Category: CatGeneral},
-	{ID: "qwen3.6-27b", Name: "Qwen 3.6 27B", Ctx: "128K", MaxOut: "16K", Category: CatGeneral},
-	{ID: "gemma-4-31b-it", Name: "Gemma 4 31B", Ctx: "128K", MaxOut: "8K", Attachment: true, Category: CatGeneral},
-	{ID: "apertus-70b-instruct-2509", Name: "Apertus 70B", Ctx: "128K", MaxOut: "8K", Category: CatGeneral},
-	{ID: "meta-llama-3.1-8b-instruct", Name: "Meta Llama 3.1 8B", Ctx: "128K", MaxOut: "4K", Category: CatGeneral},
+	{ID: "gemma-4-31b-it", Name: "Gemma 4 31B", Ctx: "256K", MaxOut: "8K", Attachment: true, Category: CatGeneral},
+	{ID: "qwen3-30b-a3b-instruct-2507", Name: "Qwen 3 30B A3B", Ctx: "256K", MaxOut: "16K", Category: CatGeneral},
+	{ID: "apertus-70b-instruct-2509", Name: "Apertus 70B", Ctx: "65K", MaxOut: "8K", Category: CatGeneral},
+	{ID: "meta-llama-3.1-8b-instruct", Name: "Llama 3.1 8B", Ctx: "128K", MaxOut: "4K", Category: CatGeneral},
 }
 
 // ProviderPrefix used in model IDs.
@@ -84,7 +82,7 @@ func ReasoningEmoji(r bool) string {
 	return "—"
 }
 
-// AttachmentEmoji returns 🖼 or — for attachment capability.
+// AttachmentEmoji returns a 🖼 symbol when a model supports image/audio input.
 func AttachmentEmoji(a bool) string {
 	if a {
 		return "🖼"
@@ -123,7 +121,7 @@ func FilterByCategory(cat Category) []Model {
 	return out
 }
 
-// FullID returns the provider-prefixed model ID (e.g. "saia/glm-4.7").
+// FullID returns the provider-prefixed model ID (e.g. "saia/glm-5.3-flash").
 func (m Model) FullID() string {
 	return ProviderPrefix + "/" + m.ID
 }
@@ -149,7 +147,7 @@ func BuildPrompt(models []Model) string {
 	b.WriteString("\n### Quick Switch\n\n")
 	b.WriteString("```bash\n")
 	b.WriteString("# Best for agentic coding\n")
-	b.WriteString("  /model saia/glm-4.7\n\n")
+	b.WriteString("  /model saia/glm-5.3-flash\n\n")
 	b.WriteString("# Flagship reasoning (long context)\n")
 	b.WriteString("  /model saia/qwen3.5-397b-a17b\n\n")
 	b.WriteString("# Code-specialized\n")

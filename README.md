@@ -16,7 +16,7 @@ Ported from [pi-saia-plugin](https://github.com/tobias-weiss-ai-xr/pi-saia-plugi
 ## Features
 
 - **Self-contained Go binary** — single static executable, no runtime dependencies
-- **Auto-registration** — `models.json` adds all 16 SAIA models on startup
+- **Auto-registration** — `models.json` adds all 14 SAIA models on startup
 - **Model auto-update** — fetches the live model catalog on load and syncs with the API (cached)
 - **L0/L1 caching** — optional in-memory + disk cache, same semantics as the pi/opencode plugins
 - **Slash commands** — `/saia-models`, `/saia-sync`, `/saia-cache`
@@ -100,14 +100,22 @@ Or add to `$ZOT_HOME/auth.json`:
 
 ## Available Models
 
-| Model ID | Name | Context | Reasoning |
-|----------|------|---------|-----------|
-| `saia/glm-4.7` | GLM 4.7 | 128K | ✅ |
-| `saia/qwen3.5-397b-a17b` | Qwen 3.5 397B | 128K | ✅ |
-| `saia/qwen3.5-122b-a10b` | Qwen 3.5 122B | 128K | ✅ |
-| `saia/devstral-2-123b-instruct-2512` | DevStral 2 123B | 128K | ✅ |
-| `saia/openai-gpt-oss-120b` | GPT-OSS 120B | 128K | ✅ |
-| `saia/qwen3.6-27b` | Qwen 3.6 27B | 128K | ✅ |
+| Model ID | Name | Context | Reasoning | Attach | Category |
+|----------|------|---------|-----------|--------|----------|
+| `saia/qwen3.5-397b-a17b` | Qwen 3.5 397B A17B | 256K | ✅ | 🖼 | reasoning |
+| `saia/qwen3.8-27b` | Qwen 3.8 27B | 262K | ✅ | — | reasoning |
+| `saia/qwen3-coder-next` | Qwen 3 Coder Next | 256K | — | — | coder |
+| `saia/devstral-2-123b-instruct-2512` | Devstral 2 123B Instruct 2512 | 256K | — | — | agentic |
+| `saia/glm-5.3-flash` | GLM 5.3 Flash | 1M | ✅ | 🖼 | agentic |
+| `saia/mistral-medium-3.5-128b` | Mistral Medium 3.5 128B | 256K | — | — | agentic |
+| `saia/qwen3.6-35b-a3b` | Qwen 3.6 35B A3B | 262K | ✅ | 🖼 | agentic |
+| `saia/openai-gpt-oss-120b` | GPT OSS 120B | 128K | ✅ | — | large-context |
+| `saia/qwen3-omni-30b-a3b-instruct` | Qwen 3 Omni 30B A3B Instruct | 256K | — | 🖼 | vision |
+| `saia/apertus-70b-instruct-2509` | Apertus 70B Instruct 2509 | 65K | — | — | general |
+| `saia/deepseek-v4-flash-0731` | DeepSeek V4 Flash 0731 | 1M | ✅ | — | general |
+| `saia/gemma-4-31b-it` | Gemma 4 31B Instruct | 256K | — | 🖼 | general |
+| `saia/meta-llama-3.1-8b-instruct` | Llama 3.1 8B Instruct | 128K | — | — | general |
+| `saia/qwen3-30b-a3b-instruct-2507` | Qwen 3 30B A3B Instruct 2507 | 256K | — | — | general |
 
 ## Usage
 
@@ -116,7 +124,7 @@ Or add to `$ZOT_HOME/auth.json`:
 zot --list-models | grep saia
 
 # Use a SAIA model
-zot --provider saia --model glm-4.7
+zot --provider saia --model glm-5.3-flash
 
 # With the extension installed, use the slash command
 /saia-models
