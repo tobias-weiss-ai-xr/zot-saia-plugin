@@ -148,8 +148,14 @@ func TestCatalogMatchesFacts(t *testing.T) {
 		if int64(modelCtxToInt(m.Ctx)) != f.ContextWindow.Tokens {
 			t.Errorf("model %q: Ctx %q does not match facts ctx %d", f.ID, m.Ctx, f.ContextWindow.Tokens)
 		}
+		if m.CtxTokens != int(f.ContextWindow.Tokens) {
+			t.Errorf("model %q: CtxTokens %d does not match facts ctx %d", f.ID, m.CtxTokens, f.ContextWindow.Tokens)
+		}
 		if m.MaxOut != maxOutLabel(f.MaxOutput) {
 			t.Errorf("model %q: MaxOut %q does not match facts max_output %d", f.ID, m.MaxOut, f.MaxOutput)
+		}
+		if m.MaxTokens != f.MaxOutput {
+			t.Errorf("model %q: MaxTokens %d does not match facts max_output %d", f.ID, m.MaxTokens, f.MaxOutput)
 		}
 		wantReasoning := f.Reasoning != nil && f.Reasoning.Supported
 		if m.Reasoning != wantReasoning {

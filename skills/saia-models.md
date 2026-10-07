@@ -55,6 +55,9 @@ With the extension installed, use the slash commands:
 /saia-sync force    # bypass the cache and force a fresh refresh
 /saia-cache         # show L0/L1 cache stats
 /saia-cache clear   # clear L0 + L1 cache
+/saia-login <key>   # store the SAIA API key in $ZOT_HOME/auth.json
+/saia-authstatus    # show how auth resolves (auth.json vs SAIA_API_KEY env)
+/saia-install-models# write the saia provider into $ZOT_HOME/models.json
 ```
 
 ## Caching
@@ -74,7 +77,7 @@ Check remaining quota at [SAIA dashboard](https://chat-ai.academiccloud.de).
 
 ## API Key
 
-The API key is resolved from `auth.json` (`saia` key), `$SAIA_API_KEY` environment variable, or `/login`.
+The API key is resolved from `auth.json` (`additional_api_key_creds.saia`, best via `/saia-login <key>`), the `$SAIA_API_KEY` environment variable, or `/login`. Note: `SAIA_API_KEY` env takes precedence over `auth.json`; a stale/rotated env value silently wins and causes a `401 Unauthorized`. Use `/saia-authstatus` to detect this. Register the provider once with `/saia-install-models` if not present.
 
 Set it via:
 ```bash

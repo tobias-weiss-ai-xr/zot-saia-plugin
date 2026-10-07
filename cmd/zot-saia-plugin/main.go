@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	e := ext.New("zot-saia-plugin", "1.4.0")
+	e := ext.New("zot-saia-plugin", "1.5.0")
 
 	// Auto-update: when the extension loads, attempt a (cached) refresh of
 	// the model catalog from the live SAIA API. On a cache hit this is a
@@ -69,6 +69,18 @@ func main() {
 		default:
 			return ext.Errorf("unknown arg %q — use 'clear' or nothing", args)
 		}
+	})
+
+	e.Command("saia-login", "store the SAIA API key in zot's auth.json (/saia-login [key])", func(args string) ext.Response {
+		return loginSAIA(args)
+	})
+
+	e.Command("saia-authstatus", "show how SAIA auth will resolve (auth.json vs env, models.json registration)", func(args string) ext.Response {
+		return authStatus(args)
+	})
+
+	e.Command("saia-install-models", "write the saia provider registration into $ZOT_HOME/models.json", func(args string) ext.Response {
+		return installModelsSAIA(args)
 	})
 
 	if err := e.Run(); err != nil {

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="${VERSION:-1.4.0}"
+VERSION="${VERSION:-1.5.0}"
 BINARY="zot-saia-plugin"
 GO="${GO:-$(command -v go)}"
 

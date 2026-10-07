@@ -26,6 +26,8 @@ type Model struct {
 	Name       string
 	Ctx        string
 	MaxOut     string
+	CtxTokens  int // exact context-window tokens (from data/saia-models.json)
+	MaxTokens  int // exact max-output tokens (from data/saia-models.json)
 	Reasoning  bool
 	Attachment bool
 	Category   Category
@@ -36,30 +38,30 @@ type Model struct {
 // (the canonical collected facts; models_test.go guards drift from facts).
 var All = []Model{
 	// Reasoning (output includes "thought")
-	{ID: "deepseek-v4-flash-0731", Name: "DeepSeek V4 Flash 0731", Ctx: "1M", MaxOut: "32K", Reasoning: true, Category: CatGeneral},
-	{ID: "glm-5.3-flash", Name: "GLM 5.3 Flash", Ctx: "1M", MaxOut: "32K", Reasoning: true, Attachment: true, Category: CatAgentic},
-	{ID: "qwen3.5-397b-a17b", Name: "Qwen 3.5 397B A17B", Ctx: "256K", MaxOut: "32K", Reasoning: true, Attachment: true, Category: CatReasoning},
-	{ID: "qwen3.6-35b-a3b", Name: "Qwen 3.6 35B A3B", Ctx: "262K", MaxOut: "16K", Reasoning: true, Attachment: true, Category: CatAgentic},
-	{ID: "qwen3.8-27b", Name: "Qwen 3.8 27B", Ctx: "262K", MaxOut: "32K", Reasoning: true, Category: CatReasoning},
+	{ID: "deepseek-v4-flash-0731", Name: "DeepSeek V4 Flash 0731", Ctx: "1M", CtxTokens: 1000000, MaxOut: "32K", MaxTokens: 32768, Reasoning: true, Category: CatGeneral},
+	{ID: "glm-5.3-flash", Name: "GLM 5.3 Flash", Ctx: "1M", CtxTokens: 1000000, MaxOut: "32K", MaxTokens: 32768, Reasoning: true, Attachment: true, Category: CatAgentic},
+	{ID: "qwen3.5-397b-a17b", Name: "Qwen 3.5 397B A17B", Ctx: "256K", CtxTokens: 256000, MaxOut: "32K", MaxTokens: 32768, Reasoning: true, Attachment: true, Category: CatReasoning},
+	{ID: "qwen3.6-35b-a3b", Name: "Qwen 3.6 35B A3B", Ctx: "262K", CtxTokens: 262000, MaxOut: "16K", MaxTokens: 16384, Reasoning: true, Attachment: true, Category: CatAgentic},
+	{ID: "qwen3.8-27b", Name: "Qwen 3.8 27B", Ctx: "262K", CtxTokens: 262000, MaxOut: "32K", MaxTokens: 32768, Reasoning: true, Category: CatReasoning},
 
 	// Coder
-	{ID: "qwen3-coder-next", Name: "Qwen 3 Coder Next", Ctx: "256K", MaxOut: "16K", Category: CatCoder},
+	{ID: "qwen3-coder-next", Name: "Qwen 3 Coder Next", Ctx: "256K", CtxTokens: 256000, MaxOut: "16K", MaxTokens: 16384, Category: CatCoder},
 
 	// Agentic
-	{ID: "devstral-2-123b-instruct-2512", Name: "DevStral 2 123B", Ctx: "256K", MaxOut: "16K", Category: CatAgentic},
-	{ID: "mistral-medium-3.5-128b", Name: "Mistral Medium 3.5 128B", Ctx: "256K", MaxOut: "8K", Category: CatAgentic},
+	{ID: "devstral-2-123b-instruct-2512", Name: "DevStral 2 123B", Ctx: "256K", CtxTokens: 256000, MaxOut: "16K", MaxTokens: 16384, Category: CatAgentic},
+	{ID: "mistral-medium-3.5-128b", Name: "Mistral Medium 3.5 128B", Ctx: "256K", CtxTokens: 256000, MaxOut: "8K", MaxTokens: 8192, Category: CatAgentic},
 
 	// Large Context
-	{ID: "openai-gpt-oss-120b", Name: "GPT-OSS 120B", Ctx: "128K", MaxOut: "8K", Reasoning: true, Category: CatLargeContext},
+	{ID: "openai-gpt-oss-120b", Name: "GPT-OSS 120B", Ctx: "128K", CtxTokens: 128000, MaxOut: "8K", MaxTokens: 8192, Reasoning: true, Category: CatLargeContext},
 
 	// Vision (image/audio input)
-	{ID: "qwen3-omni-30b-a3b-instruct", Name: "Qwen 3 Omni 30B", Ctx: "256K", MaxOut: "4K", Attachment: true, Category: CatVision},
+	{ID: "qwen3-omni-30b-a3b-instruct", Name: "Qwen 3 Omni 30B", Ctx: "256K", CtxTokens: 256000, MaxOut: "4K", MaxTokens: 4096, Attachment: true, Category: CatVision},
 
 	// General
-	{ID: "gemma-4-31b-it", Name: "Gemma 4 31B", Ctx: "256K", MaxOut: "8K", Attachment: true, Category: CatGeneral},
-	{ID: "qwen3-30b-a3b-instruct-2507", Name: "Qwen 3 30B A3B", Ctx: "256K", MaxOut: "16K", Category: CatGeneral},
-	{ID: "apertus-70b-instruct-2509", Name: "Apertus 70B", Ctx: "65K", MaxOut: "8K", Category: CatGeneral},
-	{ID: "meta-llama-3.1-8b-instruct", Name: "Llama 3.1 8B", Ctx: "128K", MaxOut: "4K", Category: CatGeneral},
+	{ID: "gemma-4-31b-it", Name: "Gemma 4 31B", Ctx: "256K", CtxTokens: 256000, MaxOut: "8K", MaxTokens: 8192, Attachment: true, Category: CatGeneral},
+	{ID: "qwen3-30b-a3b-instruct-2507", Name: "Qwen 3 30B A3B", Ctx: "256K", CtxTokens: 256000, MaxOut: "16K", MaxTokens: 16384, Category: CatGeneral},
+	{ID: "apertus-70b-instruct-2509", Name: "Apertus 70B", Ctx: "65K", CtxTokens: 65000, MaxOut: "8K", MaxTokens: 8192, Category: CatGeneral},
+	{ID: "meta-llama-3.1-8b-instruct", Name: "Llama 3.1 8B", Ctx: "128K", CtxTokens: 128000, MaxOut: "4K", MaxTokens: 4096, Category: CatGeneral},
 }
 
 // ProviderPrefix used in model IDs.
@@ -117,6 +119,63 @@ func FilterByCategory(cat Category) []Model {
 		if m.Category == cat {
 			out = append(out, m)
 		}
+	}
+	return out
+}
+
+// OutModel is the JSON shape zot's models.json schema expects for a provider
+// model (packages/provider/usermodels.go UserModel). The plugin exports the
+// catalog in this form so /saia-install-models can write $ZOT_HOME/models.json
+// without any manual or host-dependent serialization.
+type OutModel struct {
+	ID            string `json:"id"`
+	Name          string `json:"name"`
+	ContextWindow int    `json:"contextWindow"`
+	MaxTokens     int    `json:"maxTokens"`
+	Reasoning     bool   `json:"reasoning"`
+}
+
+// parseTokens converts a shorthand label ("256K", "1M") to a count. It is
+// retained for one-way token-count conversions in tests/docs.
+func parseTokens(label string) int {
+	if len(label) == 0 {
+		return 0
+	}
+	mult := 1
+	last := label[len(label)-1]
+	switch last {
+	case 'K':
+		mult = 1000
+		label = label[:len(label)-1]
+	case 'M':
+		mult = 1000000
+		label = label[:len(label)-1]
+	}
+	n := 0
+	for _, r := range label {
+		if r < '0' || r > '9' {
+			return 0
+		}
+		n = n*10 + int(r-'0')
+	}
+	return n * mult
+}
+
+// OutModels returns the full catalog serialized for a models.json
+// "providers.<name>.models" block, in catalog order so the first entry is the
+// provider default (deepseek-v4-flash-0731). Exact token counts come from the
+// Model.CtxTokens/MaxTokens fields (source: data/saia-models.json), not the
+// rounded display labels.
+func OutModels() []OutModel {
+	out := make([]OutModel, 0, len(All))
+	for _, m := range All {
+		out = append(out, OutModel{
+			ID:            m.ID,
+			Name:          m.Name,
+			ContextWindow: m.CtxTokens,
+			MaxTokens:     m.MaxTokens,
+			Reasoning:     m.Reasoning,
+		})
 	}
 	return out
 }

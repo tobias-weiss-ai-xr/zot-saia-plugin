@@ -19,7 +19,7 @@ Ported from [pi-saia-plugin](https://github.com/tobias-weiss-ai-xr/pi-saia-plugi
 - **Auto-registration** — `models.json` adds all 14 SAIA models on startup
 - **Model auto-update** — fetches the live model catalog on load and syncs with the API (cached)
 - **L0/L1 caching** — optional in-memory + disk cache, same semantics as the pi/opencode plugins
-- **Slash commands** — `/saia-models`, `/saia-sync`, `/saia-cache`
+- **Slash commands** — `/saia-models`, `/saia-sync`, `/saia-cache`, plus setup addons `/saia-login`, `/saia-authstatus`, `/saia-install-models`
 - **Skill included** — `SKILL.md` documents models, API key setup, and examples
 - **OpenAI-compatible** — Uses standard OpenAI completions API
 
@@ -78,25 +78,50 @@ zot ext install .
 Then restart zot and use:
 
 ```
-/saia-models        # list models & usage
-/saia-sync          # refresh model catalog (cached)
-/saia-sync force    # force a fresh refresh
-/saia-cache         # show cache stats
-/saia-cache clear   # clear the cache
+/saia-models           # list models & usage
+/saia-sync             # refresh model catalog (cached)
+/saia-sync force       # force a fresh refresh
+/saia-cache            # show cache stats
+/saia-cache clear      # clear the cache
+/saia-login <key>      # store the SAIA API key in zot's auth.json
+/saia-authstatus       # show how SAIA auth resolves (auth.json vs env)
+/saia-install-models   # write the saia provider into $ZOT_HOME/models.json
 ```
 
 ### API Key
 
-```bash
-export SAIA_API_KEY="your-key"
+The easiest way to configure auth is the `/saia-login` addon command — it writes
+the correct credential into `$ZOT_HOME/auth.json` and reports whether a stray
+`SAIA_API_KEY` env var would override it:
+
+```
+/saia-login <your-api-key>
 ```
 
-Or add to `$ZOT_HOME/auth.json`:
+If you installed the plugin but have not yet registered the provider, run
+`/saia-install-models` once so zot knows the `saia` provider and models.
+
+Alternatively, set the env var:
+
+```bash
+export SAIA_API_KEY="your-key"   # env takes precedence over auth.json
+```
+
+Or edit `$ZOT_HOME/auth.json` yourself with the schema zot actually reads
+(under `additional_api_key_creds`):
 ```json
 {
-  "saia": { "type": "api_key", "key": "your-key" }
+  "additional_api_key_creds": {
+    "saia": { "api_key": "your-key", "base_url": "https://chat-ai.academiccloud.de/v1" }
+  }
 }
 ```
+
+> **Note on precedence**: zot resolves the key as explicit `--api-key` > the
+> `SAIA_API_KEY` env var (any custom provider gets a `<NAME>_API_KEY` env
+> fallback) > `auth.json`. A stale/rotated `SAIA_API_KEY` in your shell will
+> silently win over a correct `auth.json` and produce a `401 Unauthorized`.
+> `/saia-authstatus` surfaces exactly this situation.
 
 ## Available Models
 
