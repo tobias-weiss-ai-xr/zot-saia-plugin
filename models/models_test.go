@@ -464,6 +464,11 @@ func TestPromptGolden(t *testing.T) {
 
 // ---------------------------------------------------------------------------
 // models.json round-trip
+//
+// models.json ships in the schema zot actually reads (top-level "providers"
+// map, see packages/provider/usermodels.go). It is the file users copy into
+// $ZOT_HOME/models.json to register the saia provider. It must list exactly
+// the same model set as the embedded models.All catalog.
 // ---------------------------------------------------------------------------
 
 func TestModelsJSONRoundTrip(t *testing.T) {
@@ -473,18 +478,18 @@ func TestModelsJSONRoundTrip(t *testing.T) {
 	}
 
 	var cfg struct {
-		AdditionalProviders map[string]struct {
+		Providers map[string]struct {
 			Models []struct {
 				ID string `json:"id"`
 			} `json:"models"`
-		} `json:"additional_providers"`
+		} `json:"providers"`
 	}
 
 	if err := json.Unmarshal(b, &cfg); err != nil {
 		t.Fatalf("parse models.json: %v", err)
 	}
 
-	saia, ok := cfg.AdditionalProviders["saia"]
+	saia, ok := cfg.Providers["saia"]
 	if !ok {
 		t.Fatal("models.json missing saia provider")
 	}
@@ -509,6 +514,27 @@ func TestModelsJSONRoundTrip(t *testing.T) {
 	for id := range codeIDs {
 		if !jsonIDs[id] {
 			t.Errorf("model %q in code but not in models.json", id)
+		}
+	}
+
+	// The first model in the saia provider is what zot falls back to when the
+	// user selects the saia provider without a --model (defaultModelForProvider
+	// has no "saia" branch, so zot uses the first candidate). It must be a
+	// functional default, not the stale catalog first entry (apertus).
+	if got := saia.Models[0].ID; got != "deepseek-v4-flash-0731" {
+		t.Errorf("default/first model = %q, want deepseek-v4-flash-0731", got)
+	}
+
+	// zot sends the model ID verbatim and has no client-side alias resolution,
+	// so aliases (best-for-coding etc.) would 404 upstream. Retired/phantom
+	// models must not be shipped either.
+	for _, banned := range []string{
+		"best-for-coding", "best-for-reasoning", "best-for-vision",
+		"best-for-agentic", "best-quality", "fastest", "fastest-reasoning", "budget",
+		"glm-4.7", "medgemma-27b-it", "qwen3.5-122b-a10b", "qwen3.6-27b",
+	} {
+		if jsonIDs[banned] {
+			t.Errorf("models.json must not ship non-functional id %q", banned)
 		}
 	}
 }

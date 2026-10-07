@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="${VERSION:-1.3.0}"
+VERSION="${VERSION:-1.4.0}"
 BINARY="zot-saia-plugin"
-GO="${GO:-/usr/local/go/bin/go}"
+GO="${GO:-$(command -v go)}"
 
 echo "==> building ${BINARY} v${VERSION}"
 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 "$GO" build \

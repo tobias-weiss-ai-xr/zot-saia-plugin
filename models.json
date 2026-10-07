@@ -1,136 +1,106 @@
 {
-  "additional_providers": {
+  "providers": {
     "saia": {
-      "name": "SAIA Academic Cloud",
-      "api": "openai-completions",
-      "base_url": "https://chat-ai.academiccloud.de/v1",
-      "api_key_env": "SAIA_API_KEY",
+      "baseUrl": "https://chat-ai.academiccloud.de/v1",
+      "api": "openai",
       "models": [
-        {
-          "id": "apertus-70b-instruct-2509",
-          "name": "Apertus 70B Instruct 2509",
-          "context_window": 65000,
-          "max_output": 8192,
-          "reasoning": false,
-          "attachment": false,
-          "category": "general"
-        },
         {
           "id": "deepseek-v4-flash-0731",
           "name": "DeepSeek V4 Flash 0731",
-          "context_window": 1000000,
-          "max_output": 32768,
-          "reasoning": true,
-          "attachment": false,
-          "category": "general"
+          "contextWindow": 1000000,
+          "maxTokens": 32768,
+          "reasoning": true
+        },
+        {
+          "id": "apertus-70b-instruct-2509",
+          "name": "Apertus 70B Instruct 2509",
+          "contextWindow": 65000,
+          "maxTokens": 8192,
+          "reasoning": false
         },
         {
           "id": "devstral-2-123b-instruct-2512",
           "name": "Devstral 2 123B Instruct 2512",
-          "context_window": 256000,
-          "max_output": 16384,
-          "reasoning": false,
-          "attachment": false,
-          "category": "agentic"
+          "contextWindow": 256000,
+          "maxTokens": 16384,
+          "reasoning": false
         },
         {
           "id": "gemma-4-31b-it",
           "name": "Gemma 4 31B Instruct",
-          "context_window": 256000,
-          "max_output": 8192,
-          "reasoning": false,
-          "attachment": true,
-          "category": "general"
+          "contextWindow": 256000,
+          "maxTokens": 8192,
+          "reasoning": false
         },
         {
           "id": "glm-5.3-flash",
           "name": "GLM 5.3 Flash",
-          "context_window": 1000000,
-          "max_output": 32768,
-          "reasoning": true,
-          "attachment": true,
-          "category": "agentic"
+          "contextWindow": 1000000,
+          "maxTokens": 32768,
+          "reasoning": true
         },
         {
           "id": "meta-llama-3.1-8b-instruct",
           "name": "Llama 3.1 8B Instruct",
-          "context_window": 128000,
-          "max_output": 4096,
-          "reasoning": false,
-          "attachment": false,
-          "category": "general"
+          "contextWindow": 128000,
+          "maxTokens": 4096,
+          "reasoning": false
         },
         {
           "id": "mistral-medium-3.5-128b",
           "name": "Mistral Medium 3.5 128B",
-          "context_window": 256000,
-          "max_output": 8192,
-          "reasoning": false,
-          "attachment": false,
-          "category": "agentic"
+          "contextWindow": 256000,
+          "maxTokens": 8192,
+          "reasoning": false
         },
         {
           "id": "openai-gpt-oss-120b",
           "name": "GPT OSS 120B",
-          "context_window": 128000,
-          "max_output": 8192,
-          "reasoning": true,
-          "attachment": false,
-          "category": "large-context"
+          "contextWindow": 128000,
+          "maxTokens": 8192,
+          "reasoning": true
         },
         {
           "id": "qwen3-30b-a3b-instruct-2507",
           "name": "Qwen 3 30B A3B Instruct 2507",
-          "context_window": 256000,
-          "max_output": 16384,
-          "reasoning": false,
-          "attachment": false,
-          "category": "general"
+          "contextWindow": 256000,
+          "maxTokens": 16384,
+          "reasoning": false
         },
         {
           "id": "qwen3-coder-next",
           "name": "Qwen 3 Coder Next",
-          "context_window": 256000,
-          "max_output": 16384,
-          "reasoning": false,
-          "attachment": false,
-          "category": "coder"
+          "contextWindow": 256000,
+          "maxTokens": 16384,
+          "reasoning": false
         },
         {
           "id": "qwen3-omni-30b-a3b-instruct",
           "name": "Qwen 3 Omni 30B A3B Instruct",
-          "context_window": 256000,
-          "max_output": 4096,
-          "reasoning": false,
-          "attachment": true,
-          "category": "vision"
+          "contextWindow": 256000,
+          "maxTokens": 4096,
+          "reasoning": false
         },
         {
           "id": "qwen3.5-397b-a17b",
           "name": "Qwen 3.5 397B A17B",
-          "context_window": 256000,
-          "max_output": 32768,
-          "reasoning": true,
-          "attachment": true,
-          "category": "reasoning"
+          "contextWindow": 256000,
+          "maxTokens": 32768,
+          "reasoning": true
         },
         {
           "id": "qwen3.6-35b-a3b",
           "name": "Qwen 3.6 35B A3B",
-          "context_window": 262000,
-          "max_output": 16384,
-          "reasoning": true,
-          "attachment": true,
-          "category": "agentic"
+          "contextWindow": 262000,
+          "maxTokens": 16384,
+          "reasoning": true
         },
         {
           "id": "qwen3.8-27b",
           "name": "Qwen 3.8 27B",
-          "context_window": 262000,
-          "max_output": 32768,
-          "reasoning": true,
-          "attachment": false,
-          "category": "reasoning"
+          "contextWindow": 262000,
+          "maxTokens": 32768,
+          "reasoning": true
         }
       ]
     }
